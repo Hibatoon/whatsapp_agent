@@ -8,7 +8,8 @@ app = Flask(__name__)
 
 verify_token = os.getenv("VERIFY_TOKEN")
 
-@app.route("/webhook", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
+
 def webhook():
 
     if request.method == "GET":
