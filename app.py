@@ -79,4 +79,4 @@ def daily_message():
     except Exception as e:
         return {"error": str(e)}, 500
 
-handler = app
+# handler = app
