@@ -1,17 +1,24 @@
 {
   "version": 2,
   "builds": [
-    { "src": "app.py", "use": "@vercel/python" }
+    {
+      "src": "app.py",
+      "use": "@vercel/python"
+    }
   ],
   "routes": [
-    { "src": "/daily", "dest": "/app.py" },
-    { "src": "/webhook", "dest": "/app.py" },
-    { "src": "/.*", "dest": "/app.py" }
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
   ],
+  "env": {
+    "FLASK_ENV": "production"
+  },
   "crons": [
     {
-      "path": "/daily",
-      "schedule": "40 2 * * *"
+      "path": "/send_daily_news",
+      "schedule": "0 19 * * *"
     }
   ]
 }
