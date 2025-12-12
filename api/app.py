@@ -100,25 +100,61 @@ def generate_reply(text):
 
 
 def send_whatsapp_message(to, text):
-    url = f"https://graph.facebook.com/v24.0/{PHONE_NUMBER_ID}/messages"
-    headers = {
-        "Authorization": f"Bearer {WHATSAPP_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "messaging_product": "whatsapp",
-        "to": to,
-        "text": {"body": text}
-    }
-    requests.post(url, headers=headers, json=payload)
+    if not PHONE_NUMBER_ID or not WHATSAPP_TOKEN:
+        print("Error: PHONE_NUMBER_ID or WHATSAPP_TOKEN not configured")
+        return False
+    
+    if not to:
+        print("Error: Recipient number (to) is required")
+        return False
+    
+    try:
+        url = f"https://graph.facebook.com/v24.0/{PHONE_NUMBER_ID}/messages"
+        headers = {
+            "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": to,
+            "text": {"body": text}
+        }
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()  # Raise exception for bad status codes
+        print(f"WhatsApp message sent successfully to {to}")
+        return True
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending WhatsApp message: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"Response status: {e.response.status_code}")
+            print(f"Response body: {e.response.text}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error sending WhatsApp message: {e}")
+        return False
 
 @app.route("/daily", methods=["GET"])
 def daily_message():
-    # news = get_daily_news()  # Fetch news from NewsAPI
-    # send_whatsapp_message(MY_NUMBER, news)  # Send via WhatsApp
-    send_whatsapp_message(MY_NUMBER, "news")  # Send via WhatsApp
-    return {"status": "news_sent"}, 200
+    if not MY_NUMBER:
+        return {"status": "error", "message": "MY_NUMBER environment variable not set"}, 500
+    
+    try:
+        # news = get_daily_news()  # Fetch news from NewsAPI
+        # send_whatsapp_message(MY_NUMBER, news)  # Send via WhatsApp
+        success = send_whatsapp_message(MY_NUMBER, "news")  # Send via WhatsApp
+        
+        if success:
+            return {"status": "news_sent", "message": "Message sent successfully"}, 200
+        else:
+            return {"status": "error", "message": "Failed to send WhatsApp message"}, 500
+    except Exception as e:
+        print(f"Error in daily_message: {e}")
+        return {"status": "error", "message": str(e)}, 500
 
 
 # Export the Flask app for Vercel
 handler = app
+
+# Run locally if executed directly
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
