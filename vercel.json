@@ -4,9 +4,9 @@
     { "src": "api/app.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/daily", "dest": "/api/app.py" },
-    { "src": "/webhook", "dest": "/api/app.py" },
-    { "src": "/.*", "dest": "/api/app.py" }
+    { "src": "/webhook", "dest": "api/app.py" },
+    { "src": "/daily", "dest": "api/app.py" },
+    { "src": "/.*", "dest": "api/app.py" }
   ],
   "crons": [
     {
