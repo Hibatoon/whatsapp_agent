@@ -10,10 +10,41 @@ WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
 PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
 
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-2.5-flash")  
+    model = genai.GenerativeModel("gemini-2.5-flash")
+
+def get_daily_news():
+    url = (
+        "https://newsapi.org/v2/top-headlines?"
+        "language=en&"
+        "pageSize=5&"  # Number of articles
+        f"apiKey={NEWS_API_KEY}"
+    )
+
+    res = requests.get(url)
+    data = res.json()
+
+    if "articles" not in data:
+        return "Couldn't fetch the news today."
+
+    articles = data["articles"]
+
+    news_message = "📰 *Today's Top News*\n\n"
+
+    for i, article in enumerate(articles, start=1):
+        title = article.get("title", "No title")
+        source = article.get("source", {}).get("name", "Unknown")
+        url = article.get("url", "")
+
+        news_message += f"{i}. *{title}*\n   _({source})_\n"
+        if url:
+            news_message += f"   🔗 {url}\n\n"
+
+    return news_message.strip()
+
 
 @app.route("/", methods=["GET"])
 def index():
@@ -80,10 +111,9 @@ def send_whatsapp_message(to, text):
 
 @app.route("/daily", methods=["GET"])
 def daily_message():
-    try:
-        send_whatsapp_message(MY_NUMBER, "Your daily automated message! 🌞")
-        return {"status": "sent"}, 200
-    except Exception as e:
-        return {"error": str(e)}, 500
+    news = get_daily_news()  # Fetch news from NewsAPI
+    send_whatsapp_message(MY_NUMBER, news)  # Send via WhatsApp
+    return {"status": "news_sent"}, 200
+
 
 # handler = app
