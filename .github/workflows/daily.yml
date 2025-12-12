@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Call Vercel Daily Endpoint
         run: |
-          curl -X GET "https://your-vercel-project.vercel.app/api/daily"
+          curl -X GET "https://whatsappagent-ivory.vercel.app/api/daily"
