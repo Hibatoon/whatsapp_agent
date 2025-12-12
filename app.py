@@ -13,7 +13,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash")  
 
 @app.route("/", methods=["GET"])
 def index():
@@ -53,13 +53,20 @@ def webhook():
 
 def generate_reply(text):
     try:
-        response = model.generate_content(f"Respond shortly to: {text}")
-        return response.text
-    except:
-        return "Error generating reply."
+        resp = model.generate_content(f"Reply concisely to: {text}")
+        # safe extraction
+        if hasattr(resp, "text") and resp.text:
+            return resp.text
+        if hasattr(resp, "response") and resp.response:
+            return resp.response[0].content
+        return "Sorry, couldn't generate a reply."
+    except Exception as e:
+        print("Gemini error:", e)
+        return "Sorry, couldn't generate a reply."
+
 
 def send_whatsapp_message(to, text):
-    url = f"https://graph.facebook.com/v16.0/{PHONE_NUMBER_ID}/messages"
+    url = f"https://graph.facebook.com/v24.0/{PHONE_NUMBER_ID}/messages"
     headers = {
         "Authorization": f"Bearer {WHATSAPP_TOKEN}",
         "Content-Type": "application/json"
