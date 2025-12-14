@@ -55,7 +55,7 @@ MY_NUMBER=your_whatsapp_number_with_country_code
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Hibatoon/test.git
+git clone https://github.com/Hibatoon/whatsapp_agent.git
 cd whatsapp_agent
 ```
 
